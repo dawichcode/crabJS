@@ -2,10 +2,13 @@
   "name": "crabjs",
   "version": "1.0.0",
   "description": "A lightweight JavaScript framework for DOM manipulation, AJAX, and canvas operations.",
-  "main": "dist/bundle.min.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
-    "watch": "webpack --watch --config webpack.config.js"
+    "build": "tsc && npm run minify",
+    "build:dev": "tsc",
+    "minify": "terser dist/index.js -c -m -o dist/index.min.js --source-map \"content='dist/index.js.map',url='index.min.js.map'\"",
+    "watch": "tsc --watch"
   },
   "keywords": [],
   "author": "",
@@ -14,13 +17,7 @@
     "@typescript-eslint/eslint-plugin": "^4.0.0",
     "@typescript-eslint/parser": "^4.0.0",
     "eslint": "^7.0.0",
-    "ts-loader": "^9.2.6",
     "typescript": "^4.5.4",
-    "webpack": "^5.64.4",
-    "webpack-cli": "^4.9.1",
-    "terser-webpack-plugin": "^5.2.5"
-  },
-  "dependencies": {
-    "path": "^0.12.7"
+    "terser": "^5.24.0"
   }
 }
