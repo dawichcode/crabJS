@@ -1,7 +1,9 @@
+import { CrabJsElementCollection } from "..";
+
 /**
  * Interface for animation methods
  */
-interface CrabJsAnimation {
+export interface CrabJsAnimation {
   /**
    * Fades in the elements over a specified duration
    * @param duration - The duration of the fade-in effect in milliseconds

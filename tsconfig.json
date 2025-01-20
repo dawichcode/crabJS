@@ -10,6 +10,6 @@
     "declaration": true,
     "sourceMap": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "docs.js"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 } 

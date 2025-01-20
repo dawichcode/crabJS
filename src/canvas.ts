@@ -1,7 +1,7 @@
 /**
  * Class to handle canvas operations
  */
-class CrabJsCanvas {
+export class CrabJsCanvas {
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
 
@@ -12,13 +12,20 @@ class CrabJsCanvas {
     }
     this.canvas = element;
     this.context = this.canvas.getContext('2d')!;
+    if (!this.context) {
+      throw new Error('Failed to get 2D context');
+    }
   }
 
   /**
    * Clears the entire canvas
    */
   public clear(): void {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    try {
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    } catch (error) {
+      console.error('Error clearing canvas:', error);
+    }
   }
 
   /**
@@ -30,8 +37,12 @@ class CrabJsCanvas {
    * @param color - The fill color of the rectangle
    */
   public drawRect(x: number, y: number, width: number, height: number, color: string): void {
-    this.context.fillStyle = color;
-    this.context.fillRect(x, y, width, height);
+    try {
+      this.context.fillStyle = color;
+      this.context.fillRect(x, y, width, height);
+    } catch (error) {
+      console.error('Error drawing rectangle:', error);
+    }
   }
 
   /**
@@ -42,10 +53,14 @@ class CrabJsCanvas {
    * @param color - The fill color of the circle
    */
   public drawCircle(x: number, y: number, radius: number, color: string): void {
-    this.context.fillStyle = color;
-    this.context.beginPath();
-    this.context.arc(x, y, radius, 0, Math.PI * 2);
-    this.context.fill();
+    try {
+      this.context.fillStyle = color;
+      this.context.beginPath();
+      this.context.arc(x, y, radius, 0, Math.PI * 2);
+      this.context.fill();
+    } catch (error) {
+      console.error('Error drawing circle:', error);
+    }
   }
 
   /**
@@ -57,9 +72,13 @@ class CrabJsCanvas {
    * @param color - The fill color of the text
    */
   public drawText(text: string, x: number, y: number, font: string, color: string): void {
-    this.context.fillStyle = color;
-    this.context.font = font;
-    this.context.fillText(text, x, y);
+    try {
+      this.context.fillStyle = color;
+      this.context.font = font;
+      this.context.fillText(text, x, y);
+    } catch (error) {
+      console.error('Error drawing text:', error);
+    }
   }
 
   /**
@@ -71,11 +90,15 @@ class CrabJsCanvas {
    * @param color - The color of the line
    */
   public drawLine(x1: number, y1: number, x2: number, y2: number, color: string): void {
-    this.context.strokeStyle = color;
-    this.context.beginPath();
-    this.context.moveTo(x1, y1);
-    this.context.lineTo(x2, y2);
-    this.context.stroke();
+    try {
+      this.context.strokeStyle = color;
+      this.context.beginPath();
+      this.context.moveTo(x1, y1);
+      this.context.lineTo(x2, y2);
+      this.context.stroke();
+    } catch (error) {
+      console.error('Error drawing line:', error);
+    }
   }
 
   /**
@@ -87,14 +110,21 @@ class CrabJsCanvas {
    * @param height - The height to draw the image
    */
   public drawImage(image: HTMLImageElement | string, x: number, y: number, width: number, height: number): void {
-    if (typeof image === 'string') {
-      const img = new Image();
-      img.src = image;
-      img.onload = () => {
-        this.context.drawImage(img, x, y, width, height);
-      };
-    } else {
-      this.context.drawImage(image, x, y, width, height);
+    try {
+      if (typeof image === 'string') {
+        const img = new Image();
+        img.src = image;
+        img.onload = () => {
+          this.context.drawImage(img, x, y, width, height);
+        };
+        img.onerror = () => {
+          console.error('Error loading image:', image);
+        };
+      } else {
+        this.context.drawImage(image, x, y, width, height);
+      }
+    } catch (error) {
+      console.error('Error drawing image:', error);
     }
   }
 
@@ -103,7 +133,11 @@ class CrabJsCanvas {
    * @param color - The stroke color
    */
   public setStrokeStyle(color: string): void {
-    this.context.strokeStyle = color;
+    try {
+      this.context.strokeStyle = color;
+    } catch (error) {
+      console.error('Error setting stroke style:', error);
+    }
   }
 
   /**
@@ -111,7 +145,11 @@ class CrabJsCanvas {
    * @param width - The line width
    */
   public setLineWidth(width: number): void {
-    this.context.lineWidth = width;
+    try {
+      this.context.lineWidth = width;
+    } catch (error) {
+      console.error('Error setting line width:', error);
+    }
   }
 }
 

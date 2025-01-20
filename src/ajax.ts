@@ -1,7 +1,7 @@
 /**
  * Interface for AJAX request options
  */
-interface Options {
+export interface Options {
   /** HTTP method (e.g., 'GET', 'POST') */
   method?: string;
   /** The URL to send the request to */
@@ -21,68 +21,108 @@ interface Options {
   /** Callback function for successful response */
   success?: (response: any) => void;
   /** Callback function for error response */
-  error?: (status: number, statusText: string) => void;
+  error?: (status: number, statusText: string, error?: Error) => void;
 }
 
-class CrabJsAjax {
+export class CrabJsAjax {
   /**
    * Performs an AJAX request with the given options
    * @param options - The options for the AJAX request
    */
   public static ajax(options: Options): void {
-    const xhr = new XMLHttpRequest();
-    const urlWithParams = CrabJsAjax.buildUrlWithParams(options.url, options.params);
-    xhr.open(options.method || 'GET', urlWithParams, true);
-
-    // Set custom headers
-    if (options.headers) {
-      for (const key in options.headers) {
-        xhr.setRequestHeader(key, options.headers[key]);
+    try {
+      if (!options.url) {
+        throw new Error('URL is required for AJAX request');
       }
-    }
 
-    // Set content type
-    if (options.contentType) {
-      xhr.setRequestHeader('Content-Type', options.contentType);
-    } else {
-      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-    }
+      const xhr = new XMLHttpRequest();
+      const urlWithParams = CrabJsAjax.buildUrlWithParams(options.url, options.params);
+      xhr.open(options.method || 'GET', urlWithParams, true);
 
-    // Set response type
-    if (options.responseType) {
-      xhr.responseType = options.responseType;
-    }
-
-    // Set timeout
-    if (options.timeout) {
-      xhr.timeout = options.timeout;
-    }
-
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === 4) {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          if (options.success) {
-            options.success(xhr.response);
+      // Set custom headers
+      if (options.headers) {
+        try {
+          for (const key in options.headers) {
+            xhr.setRequestHeader(key, options.headers[key]);
           }
-        } else {
+        } catch (error) {
           if (options.error) {
-            options.error(xhr.status, xhr.statusText);
+            options.error(0, 'Invalid headers', error as Error);
           }
+          return;
         }
       }
-    };
 
-    xhr.ontimeout = function () {
-      if (options.error) {
-        options.error(0, 'Request timed out');
+      // Set content type
+      if (options.contentType) {
+        xhr.setRequestHeader('Content-Type', options.contentType);
+      } else {
+        xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
       }
-    };
 
-    const dataToSend = options.contentType === 'application/x-www-form-urlencoded'
-      ? CrabJsAjax.encodeFormData(options.data)
-      : JSON.stringify(options.data);
+      // Set response type
+      if (options.responseType) {
+        try {
+          xhr.responseType = options.responseType;
+        } catch (error) {
+          if (options.error) {
+            options.error(0, 'Invalid response type', error as Error);
+          }
+          return;
+        }
+      }
 
-    xhr.send(options.data ? dataToSend : null);
+      // Handle response
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = options.responseType === 'json' ? JSON.parse(xhr.responseText) : xhr.responseText;
+              options.success && options.success(response);
+            } catch (error) {
+              options.error && options.error(xhr.status, 'Error parsing response', error as Error);
+            }
+          } else {
+            options.error && options.error(xhr.status, xhr.statusText);
+          }
+        }
+      };
+
+      // Handle network errors
+      xhr.onerror = () => {
+        options.error && options.error(xhr.status, 'Network error');
+      };
+
+      // Handle timeout
+      if (options.timeout) {
+        xhr.timeout = options.timeout;
+        xhr.ontimeout = () => {
+          options.error && options.error(xhr.status, 'Request timed out');
+        };
+      }
+
+      // Prepare data to send
+      let dataToSend: string | null = null;
+      if (options.data) {
+        try {
+          dataToSend = options.contentType === 'application/x-www-form-urlencoded'
+            ? CrabJsAjax.encodeFormData(options.data)
+            : JSON.stringify(options.data);
+        } catch (error) {
+          if (options.error) {
+            options.error(0, 'Error processing request data', error as Error);
+          }
+          return;
+        }
+      }
+
+      xhr.send(dataToSend);
+
+    } catch (error) {
+      if (options.error) {
+        options.error(0, 'Unexpected error occurred', error as Error);
+      }
+    }
   }
 
   /**
@@ -92,11 +132,15 @@ class CrabJsAjax {
    * @returns The URL with query parameters
    */
   private static buildUrlWithParams(url: string, params?: Record<string, string>): string {
-    if (!params) return url;
-    const queryString = Object.keys(params)
-      .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
-      .join('&');
-    return `${url}?${queryString}`;
+    try {
+      if (!params) return url;
+      const queryString = Object.keys(params)
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+        .join('&');
+      return `${url}?${queryString}`;
+    } catch (error) {
+      throw new Error(`Error building URL parameters: ${error}`);
+    }
   }
 
   /**
@@ -105,35 +149,15 @@ class CrabJsAjax {
    * @returns The encoded data string
    */
   private static encodeFormData(data: any): string {
-    return Object.keys(data)
-      .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
-      .join('&');
+    try {
+      if (typeof data !== 'object' || data === null) {
+        throw new Error('Data must be an object');
+      }
+      return Object.keys(data)
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
+        .join('&');
+    } catch (error) {
+      throw new Error(`Error encoding form data: ${error}`);
+    }
   }
 }
-
-// Usage example
-CrabJsAjax.ajax({
-  method: 'GET',
-  url: 'https://api.example.com/data',
-  params: { search: 'query' },
-  success: (response) => {
-    console.log('GET response:', response);
-  },
-  error: (status, statusText) => {
-    console.error('GET error:', status, statusText);
-  }
-});
-
-CrabJsAjax.ajax({
-  method: 'POST',
-  url: 'https://api.example.com/data',
-  data: { key: 'value' },
-  headers: { 'Custom-Header': 'value' },
-  contentType: 'application/x-www-form-urlencoded',
-  success: (response) => {
-    console.log('POST response:', response);
-  },
-  error: (status, statusText) => {
-    console.error('POST error:', status, statusText);
-  }
-}); 
