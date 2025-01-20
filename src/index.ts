@@ -319,7 +319,7 @@ class CrabJsElementCollection implements CrabJsAnimation {
   }
 }
 
-const $=(function(){
+const fs=(function(){
 return (function(selector:string){ return CrabJs.init(selector); })
 })();
 
