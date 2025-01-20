@@ -550,8 +550,9 @@ public static isValidFile(file: File,allowedTypes: string[],maxSizeKB: number,mi
   }
 }
 
-const fs=(function(){
+const f$=(function(){
 return (function(selector:string){ return CrabJs.init(selector); })
 })();
 
 
+export default f$;
