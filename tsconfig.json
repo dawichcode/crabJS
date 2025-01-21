@@ -17,14 +17,18 @@
     "strict": true,
     "esModuleInterop": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "declaration": true,
     "sourceMap": true,
     "moduleResolution": "node",
     "allowJs": false,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "jsxFactory": "jsx",
+    "jsxFragmentFactory": "Fragment",
+    "typeRoots": ["./node_modules/@types", "./speedJS/vdom"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "speedJS/**/*"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }

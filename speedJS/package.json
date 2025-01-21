@@ -1,0 +1,15 @@
+{
+  "name": "speedjs",
+  "version": "1.0.0",
+  "description": "A lightweight Virtual DOM framework",
+  "main": "dist/speedjs.js",
+  "module": "dist/speedjs.min.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "dev": "rollup -c rollup.config.js -w"
+  },
+  "keywords": ["virtual-dom", "framework", "typescript"],
+  "author": "",
+  "license": "MIT"
+} 

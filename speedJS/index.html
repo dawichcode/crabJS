@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CrabJS Demo</title>
+    <title>SpeedJS Demo</title>
     <style>
         .product-card {
             max-width: 300px;
@@ -61,6 +61,7 @@
     </style>
 </head>
 <body>
+    <div id="app"></div>
     <div class="product-card">
         <img src="product-image.jpg" alt="Product Image" class="product-image">
         <div class="product-details">
@@ -71,10 +72,13 @@
         </div>
     </div>
     
-    <!-- Include the compiled TypeScript -->
+    <!-- Include SpeedJS -->
     <script type="module">
-        import { f$ } from '../dist/index.min.js';
-        import "./script.js"
+        import { main } from './dist/speedjs.min.js';
+        import './example.js';
+        
+        // Initialize SpeedJS
+        main();
     </script>
 </body>
 </html>
